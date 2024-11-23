@@ -1,0 +1,48 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model Account {
+  id               Int           @id @default(autoincrement())
+  numero           Int           @unique
+  saldo            Float
+  createdAt        DateTime      @default(now())
+  updatedAt        DateTime      @updatedAt
+  transactionsFrom Transaction[] @relation("fromAccount")
+  transactionsTo   Transaction[] @relation("toAccount")
+}
+
+model Transaction {
+  id            Int                      @id @default(autoincrement())
+  name          String
+  type          TransactionType
+  value         Float
+  paymentMethod TransactionPaymentMethod
+  from          Account?                 @relation("fromAccount", fields: [fromId], references: [id])
+  fromId        Int?
+  to            Account?                 @relation("toAccount", fields: [toId], references: [id])
+  toId          Int?
+  createdAt     DateTime                 @default(now())
+  userId        String
+}
+
+enum TransactionType {
+  DEPOSITO
+  SAQUE
+  TRANSFERENCIA
+}
+
+enum TransactionPaymentMethod {
+  CREDIT_CARD
+  DEBIT_CARD
+  BANK_TRANSFER
+  BANK_SLIP
+  CASH
+  PIX
+  OTHER
+}
